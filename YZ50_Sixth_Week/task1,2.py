@@ -249,5 +249,5 @@ for _ in range(20):
     
     print(''.join(itos[i] for i in out)) # decode and print the generated word
 
-# Changing the block num from 3 to 8 resulted in a loss of 1.916 and a value of 2.034 by keeping the amount of neurons stable at 200 (Task 2)
+# Changing the block num from 3 to 8 resulted in a loss of 1.916 and a value of 2.034 by keeping the amount of neurons stable at 200 (Completed Task 2)
 
