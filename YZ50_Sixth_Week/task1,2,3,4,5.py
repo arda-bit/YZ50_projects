@@ -162,13 +162,25 @@ class Sequential:
     # get parameters of all layers and stretch them out into one list
     return [p for layer in self.layers for p in layer.parameters()]
 
-n_embd = 10 # the dimensionality of the character embedding vectors
-n_hidden = 300 # the number of neurons in the hidden layer of the MLP
+#  n_embd = 10 # the dimensionality of the character embedding vectors
+#  n_hidden = 300 # the number of neurons in the hidden layer of the MLP
+#  model = Sequential([
+#    Embedding(vocab_size, n_embd),
+#    FlattenConsecutive(8), Linear(n_embd * 8, n_hidden, bias=False), BatchNorm1d(n_hidden), Tanh(),
+#    Linear(n_hidden, vocab_size),
+#  ])
+
+#Task 5
+n_embd = 24 # the dimensionality of the character embedding vectors
+n_hidden = 128 # the number of neurons in the hidden layer of the MLP
 model = Sequential([
   Embedding(vocab_size, n_embd),
-  FlattenConsecutive(8), Linear(n_embd * 8, n_hidden, bias=False), BatchNorm1d(n_hidden), Tanh(),
+  FlattenConsecutive(2), Linear(n_embd * 2, n_hidden, bias=False), BatchNorm1d(n_hidden), Tanh(),
+  FlattenConsecutive(2), Linear(n_hidden * 2, n_hidden, bias=False), BatchNorm1d(n_hidden), Tanh(),
+  FlattenConsecutive(2), Linear(n_hidden * 2, n_hidden, bias=False), BatchNorm1d(n_hidden), Tanh(),
   Linear(n_hidden, vocab_size),
 ])
+
 #parameter init
 with torch.no_grad():
   model.layers[-1].weight *= 0.1 # last layer make less confident
@@ -177,6 +189,28 @@ parameters = model.parameters()
 print(sum(p.nelement() for p in parameters)) # number of parameters in total
 for p in parameters:
   p.requires_grad = True
+
+# Task 3
+ix = torch.randint(0, Xtr.shape[0], (4,))  # look at a batch of just 4 examples
+Xb, Yb = Xtr[ix], Ytr[ix]
+logits = model(Xb)  
+
+for layer in model.layers:
+  print(layer.__class__.__name__, ':', tuple(layer.out.shape))
+# Embedding: (4, 8, 10)
+# FlattenConsecutive: (4, 4, 20)
+# Linear: (4, 4, 200)
+# BatchNorm1d: (4, 4, 200)
+# Tanh: (4, 4, 200)
+# FlattenConsecutive: (4, 2, 20)
+# Linear: (4, 2, 200)
+# BatchNorm1d: (4, 2, 200)
+# Tanh: (4, 2, 200)
+# FlattenConsecutive: (4, 400)
+# Linear: (4, 200)
+# BatchNorm1d: (4, 200)
+# Tanh: (4, 200)
+# Linear: (4,27)
 
 # same optimization as last time
 max_steps = 200000
@@ -249,5 +283,23 @@ for _ in range(20):
     
     print(''.join(itos[i] for i in out)) # decode and print the generated word
 
-# Changing the block num from 3 to 8 resulted in a loss of 1.916 and a value of 2.034 by keeping the amount of neurons stable at 200 (Completed Task 2)
+# Changing the context from 3 to 8 resulted in a loss of 1.919 and validation loss of 2.029 by keeping the amount of neurons stable at 200 (Completed Task 2)
+# Task 2de loss da buyuk bir dusus yasanmadi cunku her ne kadar parametre sayisini 3ten 8e cikarmis
+# olsak da bu neural network gene tum islemi tek harekette yapiyordu. 
+    
+# Task 4
+# Changing the neural net from a flat model to a wave mode makes loss 1.942 and validation loss 2.030
+# With the bug fix on BatchNorm1d makes the loss 1.912 and validation loss 2.022 which is a small improvement compared to the silent error version
 
+
+# Task 4te Batchnormdaki hata sondaki degiskenin paralel sekilde calismasidir. Bu sebebple ortadaki
+# grouplandirmaya yarayan matriks degiskeni bir batch olarak gorulmuyor ve bu yuzden broadcastingde hata oluyor
+# bu bence silent error cunku hata olmasina ragmen kod duzgun calisiyormus gibi gorunuyor
+
+# Task 5 Table of Values
+# Model                                         | Parameters    |    Train Loss     |       Val Loss
+# ---------------------------------------------------------------------------------------------------------
+# 3 layered flat MLP (10 = emb and 200 neurons) |     12        |      1.973        |        2.101        |
+# 8 layered flat MLP (10 = emb and 200 neurons) |     22        |      1.919        |        2.029        |
+# 8 layered Wavenet (24 emb and 128 neurons)    |    76.5       |      1.768        |        1.991        |
+# ---------------------------------------------------------------------------------------------------------
