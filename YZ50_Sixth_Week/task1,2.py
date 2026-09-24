@@ -163,7 +163,7 @@ class Sequential:
     return [p for layer in self.layers for p in layer.parameters()]
 
 n_embd = 10 # the dimensionality of the character embedding vectors
-n_hidden =300 # the number of neurons in the hidden layer of the MLP
+n_hidden = 300 # the number of neurons in the hidden layer of the MLP
 model = Sequential([
   Embedding(vocab_size, n_embd),
   FlattenConsecutive(8), Linear(n_embd * 8, n_hidden, bias=False), BatchNorm1d(n_hidden), Tanh(),
