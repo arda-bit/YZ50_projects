@@ -293,4 +293,10 @@ for _ in range(20):
 
 # " " bosluk karakteri olmadigi ve isim tekrarinin olmadigi zamanki cikan degerler learning rate de dusuruldu
 # train 1.1621183156967163
-# val 3.158479928970337
+# val 1.358479928970337
+    
+# Loss values from Week 4
+# train 1.1420
+# val 1.6319
+
+# validation loss degeri daha kucuk cikti bu da modelde kucuk bir gelisme oldugunu gosterir
